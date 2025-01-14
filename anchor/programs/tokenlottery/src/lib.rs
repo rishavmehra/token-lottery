@@ -1,17 +1,38 @@
 use anchor_lang::prelude::*;
 use anchor_spl::{
   associated_token::AssociatedToken,
-  token_interface::{TokenInterface, Mint, TokenAccount}
+  token_interface::{mint_to, MintTo, TokenInterface, Mint, TokenAccount}
 };
 use anchor_spl::metadata::{
   Metadata,
+  create_metadata_accounts_v3,
+  create_master_edition_v3,
+  CreateMetadataAccountsV3,
+  CreateMasterEditionV3,
+  mpl_token_metadata::types::{
+    DataV2,
+    CollectionDetails,
+    Creator
+  }
 };
 
 declare_id!("C2Hh76cyFRXzAezpSp4VFMeeWVzGtB4g5zEmYUggkYcM");
 
+#[constant]
+pub const NAME: &str= "Token Lottery Ticket #";
+
+#[constant]
+pub const SYMBOL: &str= "TLT";
+
+#[constant]
+pub const URI: &str= "https://raw.githubusercontent.com/rishavmehra/token-lottery/refs/heads/main/metadata.json";
+
+
 #[program]
 pub mod tokenlottery {
-  use super::*;
+use anchor_spl::metadata::{sign_metadata, SignMetadata};
+
+use super::*;
 
   pub fn initialize_config(
     ctx: Context<Initialize>,
@@ -31,8 +52,93 @@ pub mod tokenlottery {
   }
 
   pub fn initialize_lottery(
-    _ctx: Context<InitializeLottery>,
+    ctx: Context<InitializeLottery>,
   ) ->Result<()> {
+    let signer_seeds: &[&[&[u8]]] = &[&[
+      b"collection_mint".as_ref(),
+      &[ctx.bumps.collection_mint],
+    ]];
+
+    msg!("Create Mint Account");
+    mint_to(
+      CpiContext::new_with_signer(
+        ctx.accounts.token_program.to_account_info(), 
+        MintTo{
+          mint: ctx.accounts.collection_mint.to_account_info(),
+          to: ctx.accounts.collection_token_account.to_account_info(),
+          authority: ctx.accounts.collection_mint.to_account_info(),
+        }, 
+        signer_seeds
+      ),
+      1
+    )?;
+
+    msg!("Create Metadata Account");
+    create_metadata_accounts_v3(
+      CpiContext::new_with_signer(
+        ctx.accounts.token_metadata_program.to_account_info(), 
+        CreateMetadataAccountsV3{
+          metadata: ctx.accounts.metadata.to_account_info() ,
+          mint: ctx.accounts.collection_mint.to_account_info(),
+          mint_authority: ctx.accounts.collection_mint.to_account_info(),
+          payer: ctx.accounts.payer.to_account_info(),
+          update_authority: ctx.accounts.collection_mint.to_account_info(),
+          system_program: ctx.accounts.system_program.to_account_info(),
+          rent: ctx.accounts.system_program.to_account_info(),
+        },
+        &signer_seeds
+      ), 
+      DataV2{
+        name: NAME.to_string(),
+        symbol: SYMBOL.to_string(),
+        uri: URI.to_string(),
+        seller_fee_basis_points: 0,
+        creators: Some(vec![
+          Creator {
+            address: ctx.accounts.collection_mint.key(),
+            verified: false,
+            share: 100,
+          }]),
+        collection: None,
+        uses: None,
+      }, 
+      true, 
+      true, 
+      Some(CollectionDetails::V1 { size: 0 })
+    )?;
+
+    msg!("Create Master Edition Account");
+    create_master_edition_v3(
+      CpiContext::new_with_signer(
+        ctx.accounts.token_metadata_program.to_account_info(), 
+        CreateMasterEditionV3{
+          payer: ctx.accounts.payer.to_account_info(),
+          mint: ctx.accounts.collection_mint.to_account_info(),
+          edition: ctx.accounts.master_edition.to_account_info(),
+          mint_authority: ctx.accounts.collection_mint.to_account_info(),
+          update_authority: ctx.accounts.collection_mint.to_account_info(),
+          metadata: ctx.accounts.metadata.to_account_info(),
+          token_program: ctx.accounts.token_program.to_account_info() ,
+          system_program: ctx.accounts.system_program.to_account_info(),
+          rent: ctx.accounts.rent.to_account_info(),
+        },
+        signer_seeds
+      ),
+      Some(0)
+    )?;
+
+    msg!("Verifying Collection");
+    sign_metadata(
+      CpiContext::new_with_signer(
+        ctx.accounts.token_metadata_program.to_account_info(), 
+        SignMetadata{
+          creator: ctx.accounts.collection_mint.to_account_info(),
+          metadata: ctx.accounts.metadata.to_account_info(),
+        }, 
+        signer_seeds
+      )
+    )?;
+
     Ok(())
   }
 }
@@ -109,9 +215,10 @@ pub struct InitializeLottery<'info> {
   pub collection_token_account: InterfaceAccount<'info, TokenAccount>,
 
   pub token_metadata_program: Program<'info, Metadata>,
-  pub associated_token_program: Interface<'info, AssociatedToken>,
+  pub associated_token_program: Program<'info, AssociatedToken>,
   pub token_program: Interface<'info, TokenInterface>,
   pub system_program: Program<'info, System>,
+  pub rent: Sysvar<'info, Rent>,
 }
 
 #[account]
