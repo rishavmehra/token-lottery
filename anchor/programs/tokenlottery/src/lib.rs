@@ -84,7 +84,7 @@ use super::*;
           payer: ctx.accounts.payer.to_account_info(),
           update_authority: ctx.accounts.collection_mint.to_account_info(),
           system_program: ctx.accounts.system_program.to_account_info(),
-          rent: ctx.accounts.system_program.to_account_info(),
+          rent: ctx.accounts.rent.to_account_info(),
         },
         &signer_seeds
       ), 
