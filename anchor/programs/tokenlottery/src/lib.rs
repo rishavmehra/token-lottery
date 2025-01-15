@@ -9,6 +9,8 @@ use anchor_spl::metadata::{
   create_metadata_accounts_v3,
   create_master_edition_v3,
   set_and_verify_sized_collection_item,
+  sign_metadata, 
+  SignMetadata, 
   SetAndVerifySizedCollectionItem,
   CreateMetadataAccountsV3,
   CreateMasterEditionV3,
@@ -354,7 +356,7 @@ pub struct BuyTicket<'info> {
       mint::freeze_authority=collection_mint,
       mint::token_program=token_program,
   )]
-  pub ticket_mint: Interface<'info, Mint>,
+  pub ticket_mint: InterfaceAccount<'info, Mint>,
 
   #[account(
     mut,
