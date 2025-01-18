@@ -177,7 +177,7 @@ use super::*;
         CpiContext::new_with_signer(
           ctx.accounts.token_program.to_account_info(), 
           MintTo{
-            mint: ctx.accounts.collection_mint.to_account_info(),
+            mint: ctx.accounts.ticket_mint.to_account_info(),
             to: ctx.accounts.destination.to_account_info(),
             authority: ctx.accounts.collection_mint.to_account_info(),
           }, 
@@ -219,7 +219,7 @@ use super::*;
           ctx.accounts.token_metadata_program.to_account_info(), 
           CreateMasterEditionV3{
             edition: ctx.accounts.ticket_metadata_edition.to_account_info(),
-            mint: ctx.accounts.collection_mint.to_account_info(),
+            mint: ctx.accounts.ticket_mint.to_account_info(),
             update_authority: ctx.accounts.collection_mint.to_account_info(),
             mint_authority: ctx.accounts.collection_mint.to_account_info(),
             payer: ctx.accounts.payer.to_account_info(),
@@ -253,7 +253,7 @@ use super::*;
       ctx.accounts.token_lottery.total_tickets += 1;
 
       Ok(())
-  }
+  } 
 }
 
 #[derive(Accounts)]
@@ -400,7 +400,7 @@ pub struct BuyTicket<'info> {
     seeds= [
       b"metadata",
       token_metadata_program.key().as_ref(),
-      ticket_mint.key().as_ref(),
+      collection_mint.key().as_ref(),
     ],
     bump,
     seeds::program= token_metadata_program.key(),
@@ -413,7 +413,7 @@ pub struct BuyTicket<'info> {
     seeds=[
       b"metadata",
       token_metadata_program.key().as_ref(),
-      ticket_mint.key().as_ref(),
+      collection_mint.key().as_ref(),
       b"edition"
     ],
     bump,
