@@ -334,6 +334,60 @@ export type Tokenlottery = {
       "args": []
     },
     {
+      "name": "commitRandomness",
+      "discriminator": [
+        146,
+        52,
+        195,
+        220,
+        79,
+        30,
+        53,
+        26
+      ],
+      "accounts": [
+        {
+          "name": "payer",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "tokenLottery",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  116,
+                  111,
+                  107,
+                  101,
+                  110,
+                  95,
+                  108,
+                  111,
+                  116,
+                  116,
+                  101,
+                  114,
+                  121
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "randomnessAccount"
+        },
+        {
+          "name": "systemProgram",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": []
+    },
+    {
       "name": "initializeConfig",
       "discriminator": [
         208,
@@ -601,6 +655,16 @@ export type Tokenlottery = {
       "code": 6000,
       "name": "lotteryNotOpen",
       "msg": "Lottery iis not open"
+    },
+    {
+      "code": 6001,
+      "name": "notAuthorized",
+      "msg": "Not Authorized"
+    },
+    {
+      "code": 6002,
+      "name": "randomenessAlreadyRevealed",
+      "msg": "Randomness Already Revealed"
     }
   ],
   "types": [
