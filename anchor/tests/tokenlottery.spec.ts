@@ -179,12 +179,41 @@ describe('tokenlottery', () => {
     .add(sbCommitIx)
     .add(commitIx)
 
-    const sign = await anchor.web3.sendAndConfirmTransaction(
+    const Commitsign = await anchor.web3.sendAndConfirmTransaction(
       provider.connection, commitTx, [wallet.payer], {skipPreflight: true}
     )
 
-    console.log("commit sign: ", sign);
+    console.log("commit sign: ", Commitsign);
   
+    const sbRevealIx = await randomness.revealIx()
 
+    const revealIx  = await program.methods.chooseWinner()
+    .accounts(
+      {
+        randomnessAccountData: randomness.pubkey
+      }
+    )
+    .instruction();
+
+    const revealTx = await sb.asV0Tx({
+      // @ts-ignore
+      connection: provider.connection,
+      ixs: [sbRevealIx, revealIx],
+      payer: wallet.publicKey,
+      signers: [wallet.payer],
+      // computeUnitPrice: 75_000,
+      // computeUnitLimitMultiple: 1.3
+    })
+
+    const revealSign = await provider.connection.sendTransaction(revealTx);
+
+    const blockhashContext = await provider.connection.getLatestBlockhashAndContext()
+    await provider.connection.confirmTransaction({
+      signature: revealSign,
+      blockhash: blockhashContext.value.blockhash,
+      lastValidBlockHeight: blockhashContext.value.lastValidBlockHeight
+    })
+    console.log("transaction: ", revealSign);
+    
   })
 })

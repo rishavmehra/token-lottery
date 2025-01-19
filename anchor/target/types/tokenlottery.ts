@@ -334,6 +334,271 @@ export type Tokenlottery = {
       "args": []
     },
     {
+      "name": "chooseWinner",
+      "discriminator": [
+        94,
+        248,
+        225,
+        4,
+        43,
+        60,
+        118,
+        243
+      ],
+      "accounts": [
+        {
+          "name": "payer",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "tokenLottery",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  116,
+                  111,
+                  107,
+                  101,
+                  110,
+                  95,
+                  108,
+                  111,
+                  116,
+                  116,
+                  101,
+                  114,
+                  121
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "randomnessAccountData"
+        },
+        {
+          "name": "systemProgram",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "claimPrize",
+      "discriminator": [
+        157,
+        233,
+        139,
+        121,
+        246,
+        62,
+        234,
+        235
+      ],
+      "accounts": [
+        {
+          "name": "payer",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "tokenLottery",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  116,
+                  111,
+                  107,
+                  101,
+                  110,
+                  95,
+                  108,
+                  111,
+                  116,
+                  116,
+                  101,
+                  114,
+                  121
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "collectionMint",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  99,
+                  111,
+                  108,
+                  108,
+                  101,
+                  99,
+                  116,
+                  105,
+                  111,
+                  110,
+                  95,
+                  109,
+                  105,
+                  110,
+                  116
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "ticketMint",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "account",
+                "path": "token_lottery.winner",
+                "account": "tokenLottery"
+              }
+            ]
+          }
+        },
+        {
+          "name": "metadata",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  109,
+                  101,
+                  116,
+                  97,
+                  100,
+                  97,
+                  116,
+                  97
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "tokenMetadataProgram"
+              }
+            ],
+            "program": {
+              "kind": "account",
+              "path": "tokenMetadataProgram"
+            }
+          }
+        },
+        {
+          "name": "destination",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "account",
+                "path": "payer"
+              },
+              {
+                "kind": "account",
+                "path": "tokenProgram"
+              },
+              {
+                "kind": "account",
+                "path": "ticketMint"
+              }
+            ],
+            "program": {
+              "kind": "const",
+              "value": [
+                140,
+                151,
+                37,
+                143,
+                78,
+                36,
+                137,
+                241,
+                187,
+                61,
+                16,
+                41,
+                20,
+                142,
+                13,
+                131,
+                11,
+                90,
+                19,
+                153,
+                218,
+                255,
+                16,
+                132,
+                4,
+                142,
+                123,
+                216,
+                219,
+                233,
+                248,
+                89
+              ]
+            }
+          }
+        },
+        {
+          "name": "collectionMetadata",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  109,
+                  101,
+                  116,
+                  97,
+                  100,
+                  97,
+                  116,
+                  97
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "tokenMetadataProgram"
+              }
+            ],
+            "program": {
+              "kind": "account",
+              "path": "tokenMetadataProgram"
+            }
+          }
+        },
+        {
+          "name": "tokenProgram"
+        },
+        {
+          "name": "systemProgram",
+          "address": "11111111111111111111111111111111"
+        },
+        {
+          "name": "tokenMetadataProgram",
+          "address": "metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s"
+        }
+      ],
+      "args": []
+    },
+    {
       "name": "commitRandomness",
       "discriminator": [
         146,
@@ -654,7 +919,7 @@ export type Tokenlottery = {
     {
       "code": 6000,
       "name": "lotteryNotOpen",
-      "msg": "Lottery iis not open"
+      "msg": "Lottery is not open"
     },
     {
       "code": 6001,
@@ -665,6 +930,41 @@ export type Tokenlottery = {
       "code": 6002,
       "name": "randomenessAlreadyRevealed",
       "msg": "Randomness Already Revealed"
+    },
+    {
+      "code": 6003,
+      "name": "incorrectRandomnessAccount",
+      "msg": "Incorrect Randomness Account"
+    },
+    {
+      "code": 6004,
+      "name": "lotteryNotCompleted",
+      "msg": "Lottery not completed"
+    },
+    {
+      "code": 6005,
+      "name": "winnerChosen",
+      "msg": "Winner already chosen"
+    },
+    {
+      "code": 6006,
+      "name": "randomnessNotResolved",
+      "msg": "Randomness Not Resolved"
+    },
+    {
+      "code": 6007,
+      "name": "winnerNotChosen",
+      "msg": "Winner not Chosen"
+    },
+    {
+      "code": 6008,
+      "name": "notVerifiedTicket",
+      "msg": "Ticket is not verified"
+    },
+    {
+      "code": 6009,
+      "name": "incorrectTicket",
+      "msg": "Incorrect ticket"
     }
   ],
   "types": [
